@@ -4,6 +4,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_scancode.h>
+#include <SDL2/SDL_stdinc.h>
+#include <SDL2/SDL_timer.h>
 #include <iostream>
 #define nl '\n'
 
@@ -15,11 +17,11 @@
 void manageKeyPress(const Uint8* keybaordStates, GravityFollowingEntity &player) {
     if (keybaordStates[SDL_SCANCODE_W])
         if (player.getY() + player.getCurrentFrame().h == 720)
-            player.addYVelocity(-1);
+            player.addYVelocity(-20);
     if (keybaordStates[SDL_SCANCODE_A])
-        player.addX(-1);
+        player.addX(-5);
     if (keybaordStates[SDL_SCANCODE_D])
-        player.addX(1);
+        player.addX(5);
 }
 
 int main(int argc, char* args[]) {
@@ -54,7 +56,10 @@ int main(int argc, char* args[]) {
     
     SDL_Event event;
     
+    float lastRenderTime = SDL_GetTicks();
+
     while (isRunning) {
+
         const Uint8* keyboardStates = SDL_GetKeyboardState(NULL);  
         manageKeyPress(keyboardStates, player);
 
@@ -63,19 +68,24 @@ int main(int argc, char* args[]) {
                 case SDL_QUIT:
                       isRunning = false;
                       break;
-                case SDL_KEYDOWN:    
-                    break;
                 default:
                       break;
             }
-        
-        if (!(cnt++ % 40)) {
-            player.updateLocation();
-        }
+         
+        player.updateLocation();
 
+        float curTime = SDL_GetTicks();
+        float delayTime = std::max(0.0f, WindowConstants::FRAME_TIME_MILLISECONDS - (curTime - lastRenderTime)); 
+        
+        if (delayTime)
+            SDL_Delay(delayTime);
+
+        lastRenderTime = curTime; 
+        
         window.clear();
         window.render(player);
         window.display();
+   
     }
     
     
