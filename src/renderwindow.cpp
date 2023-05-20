@@ -1,11 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <cstddef>
 #include <iostream>
+
 #include "RenderWindow.hpp"
+#include "Entity.hpp"
 #define nl '\n'
 
 RenderWindow::RenderWindow(const char* p_title, int p_w, int p_h) :window(NULL), renderer(NULL) {
@@ -27,8 +30,11 @@ SDL_Texture* RenderWindow::loadTexture(const char* p_filePath) {
     return texture;
 }
 
-void RenderWindow::render(SDL_Texture* texture) {
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+void RenderWindow::render(Entity &p_entity) {
+    SDL_Rect src = p_entity.getTextureFrame();
+    SDL_Rect dest = p_entity.getCurrentFrame();
+
+    SDL_RenderCopy(renderer, p_entity.getTexture(), &src, &dest);
 }
 
 void RenderWindow::clear() {
