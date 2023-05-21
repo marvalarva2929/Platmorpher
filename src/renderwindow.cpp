@@ -31,8 +31,8 @@ SDL_Texture* RenderWindow::loadTexture(const char* p_filePath) {
 }
 
 void RenderWindow::render(Entity &p_entity) {
-    SDL_Rect src = p_entity.getTextureFrame();
-    SDL_Rect dest = p_entity.getCurrentFrame();
+    SDL_Rect src = *p_entity.getTextureFrame();
+    SDL_Rect dest = *p_entity.getCurrentFrame();
 
     SDL_RenderCopy(renderer, p_entity.getTexture(), &src, &dest);
 }
