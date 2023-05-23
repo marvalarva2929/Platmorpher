@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 
+#include "Constants.cpp"
 #include "GlobalValues.hpp"
 #include "Platform.hpp"
 #include "Entity.hpp"
@@ -18,5 +19,11 @@ Platform::Platform(
     absoluteY(currentFrameRect->y) {};
 
 void Platform::updateLocation() {
+
     setX(globalValues->getWindowX() + absoluteX);
+    setY(globalValues->getWindowY() + absoluteY);
+    if (getX() + currentFrame.w < 0)
+        absoluteX += WindowConstants::WIDTH;
+    if (getX() > WindowConstants::WIDTH)
+        absoluteX -= WindowConstants::WIDTH;
 }

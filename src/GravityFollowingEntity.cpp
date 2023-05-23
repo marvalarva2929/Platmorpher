@@ -21,22 +21,42 @@ void GravityFollowingEntity::addYVelocity(int toAdd) {
     //currentYVel = std::max(currentYVel, -10);
 }
 
+void GravityFollowingEntity::addXVelocity(int toAdd) {
+    currentXVel += toAdd;
+    currentXVel = std::min(currentXVel, 10);
+    currentXVel = std::max(currentXVel, -10);
+}
+
 void GravityFollowingEntity::updateLocation() {
     if (!onFloor) {
         currentYVel += accelerationConstant;
     } else {
         currentYVel = 0;
-        predictedPosition = getY();
+        predictedY = getY();
     }
-
+    
+    globalValues->addWindowX(-currentXVel);
     addY(currentYVel);
+    
+    currentXVel -= (int)ceil((double)currentXVel)/1.1f;
+
+    predictedX = getX() + currentXVel;
 
     if (!onFloor)
-        predictedPosition = getY() + currentYVel + accelerationConstant; 
+        predictedY = getY() + currentYVel + accelerationConstant; 
+    
+}
+
+void GravityFollowingEntity::moveTowardsCenter() {
+   int centerH = WindowConstants::HEIGHT/2;
+
+    addY((centerH - getY())/20);
 }
 
 void GravityFollowingEntity::setOnFloor(bool toSet) { onFloor = toSet; }
 
-int GravityFollowingEntity::getPredictedPosition() { return predictedPosition; }
+int GravityFollowingEntity::getPredictedPositionY() { return predictedY; }
+
+int GravityFollowingEntity::getPredictedPositionX() { return predictedX; }
 
 bool GravityFollowingEntity::isOnFloor() { return onFloor; } 

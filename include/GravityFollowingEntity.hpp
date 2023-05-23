@@ -13,12 +13,17 @@ class GravityFollowingEntity : public Entity {
         GravityFollowingEntity(SDL_Texture* p_texture, SDL_Rect& p_textureRect, SDL_Rect& p_destinationRect, GlobalValues* p_globalValues,  int p_initalVel);
         void updateLocation();
         void addYVelocity(int toAdd);
+        void addXVelocity(int toAdd);
         void setOnFloor(bool toSet);
-        int getPredictedPosition();
+        void moveTowardsCenter();
+        int getPredictedPositionY();
+        int getPredictedPositionX();
         bool isOnFloor();
     private:
         bool onFloor = false;
         int currentYVel;
+        int currentXVel = 0;
         int accelerationConstant = PhysicsConstants::accelerationConstant;
-        int predictedPosition;
+        int predictedY;
+        int predictedX;
 };

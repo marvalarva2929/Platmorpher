@@ -14,6 +14,7 @@ class RenderWindow {
         SDL_Texture* loadTexture(const char* p_filePath);
         void clear();
         void render(Entity &p_entity);
+        void renderRotated(Entity &p_entity, double rotation);
         void display();
         void cleanup();
 };

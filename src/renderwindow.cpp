@@ -31,10 +31,21 @@ SDL_Texture* RenderWindow::loadTexture(const char* p_filePath) {
 }
 
 void RenderWindow::render(Entity &p_entity) {
-    SDL_Rect src = *p_entity.getTextureFrame();
-    SDL_Rect dest = *p_entity.getCurrentFrame();
+    SDL_Rect* src = p_entity.getTextureFrame();
+    SDL_Rect* dest = p_entity.getCurrentFrame();
 
-    SDL_RenderCopy(renderer, p_entity.getTexture(), &src, &dest);
+    SDL_RenderCopy(renderer, p_entity.getTexture(), src, dest);
+}
+
+void RenderWindow::renderRotated(Entity &p_entity, double rotation) {
+    SDL_RenderCopyEx(
+            renderer, 
+            p_entity.getTexture(), 
+            p_entity.getTextureFrame(), 
+            p_entity.getCurrentFrame(), 
+            rotation, 
+            NULL, 
+            SDL_FLIP_NONE); 
 }
 
 void RenderWindow::clear() {
