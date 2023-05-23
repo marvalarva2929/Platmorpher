@@ -15,7 +15,7 @@ class WindowConstants {
 
 class PhysicsConstants {
     public:
-        const static int accelerationConstant = 0;
+        const static int accelerationConstant = 1;
         constexpr static int maxVelocity = 10;
 };
     
