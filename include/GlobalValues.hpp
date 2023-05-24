@@ -11,6 +11,6 @@ class GlobalValues {
         int getWindowY();
         int getWindowX();
     private:
-        int currentWindowY;
-        int currentWindowX;
+        int currentWindowY = 0;
+        int currentWindowX = 0;
 };

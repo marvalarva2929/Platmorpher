@@ -18,6 +18,8 @@ class GravityFollowingEntity : public Entity {
         void moveTowardsCenter();
         int getPredictedPositionY();
         int getPredictedPositionX();
+        int getYVelocity();
+        int getXVelocity();
         bool isOnFloor();
     private:
         bool onFloor = false;

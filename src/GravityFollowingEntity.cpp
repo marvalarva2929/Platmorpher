@@ -59,4 +59,8 @@ int GravityFollowingEntity::getPredictedPositionY() { return predictedY; }
 
 int GravityFollowingEntity::getPredictedPositionX() { return predictedX; }
 
+int GravityFollowingEntity::getYVelocity() { return currentYVel; }
+
+int GravityFollowingEntity::getXVelocity() { return currentXVel; } 
+
 bool GravityFollowingEntity::isOnFloor() { return onFloor; } 

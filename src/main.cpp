@@ -5,6 +5,7 @@
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_timer.h>
 #include <iostream>
+#include <vector>
 #define nl '\n'
 
 #include "RenderWindow.hpp"
@@ -13,6 +14,16 @@
 #include "Constants.cpp"
 #include "GlobalValues.hpp"
 #include "Platform.hpp"
+
+SDL_Rect getRect(int x, int y, int w, int h) {
+    SDL_Rect ret;
+    ret.x = x;
+    ret.y = y;
+    ret.w = w;
+    ret.h = h;
+
+    return ret;
+}
 
 int main(int argc, char* args[]) {
      
@@ -23,79 +34,46 @@ int main(int argc, char* args[]) {
         std::cout << "IMG_init has failed. Error: " << SDL_GetError() << nl;
     
     RenderWindow window("Platmorpher", WindowConstants::WIDTH, WindowConstants::HEIGHT);    
+   
+    // Textures 
     SDL_Texture* morpherTexture = window.loadTexture("res/imgs/normal.gif");
     SDL_Texture* platformTexture = window.loadTexture("res/imgs/platform.gif");
     SDL_Texture* gameOverText = window.loadTexture("res/imgs/gameover.png");
-
+   
+    // SRC Rects 
+    SDL_Rect platformTextureRect = getRect(0, 0, 3, 49);   
+    SDL_Rect gameOverTextSrcRect = getRect(400, 250, 525, 540); 
+    SDL_Rect playerTextureRect = getRect(0, 0, 17, 17);
+    
+    // DEST Rects
+    SDL_Rect platformDestinationRect1 = getRect(WindowConstants::WIDTH/2, 600, 100, 5);
+    SDL_Rect platformDestinationRect2 = getRect(WindowConstants::WIDTH/2 + 200, 400, 100, 5);
+    SDL_Rect platformDestinationRect3 = getRect(WindowConstants::WIDTH/2 + 400, 700, 100, 5);
+    SDL_Rect gameOverTextDestRect = getRect(WindowConstants::WIDTH/2 - (gameOverTextSrcRect.w - gameOverTextSrcRect.x)/2, 300, 960 - gameOverTextSrcRect.x, 540 - gameOverTextSrcRect.y);
+    SDL_Rect playerDestinationRect = getRect(WindowConstants::WIDTH/2, 0, 50, 50);
+    
+    // Entities
     GlobalValues globalValues(0);
-    
-    SDL_Rect gameOverTextSrcRect;
-    gameOverTextSrcRect.x = 400;
-    gameOverTextSrcRect.y = 250;
-    gameOverTextSrcRect.w = 525;
-    gameOverTextSrcRect.h = 540;
-
-    SDL_Rect gameOverTextDestRect;
-    gameOverTextDestRect.x = WindowConstants::WIDTH/2 - (gameOverTextSrcRect.w - gameOverTextSrcRect.x)/2;
-    gameOverTextDestRect.y = 300;
-    gameOverTextDestRect.w = 960 - gameOverTextSrcRect.x;
-    gameOverTextDestRect.h = 540 - gameOverTextSrcRect.y;
-
     Entity gameOverTextEntity(gameOverText, gameOverTextDestRect, gameOverTextSrcRect, &globalValues);
-
-    SDL_Rect playerDestinationRect;
-    playerDestinationRect.x = WindowConstants::WIDTH/2 -191;
-    playerDestinationRect.y = 0;
-    playerDestinationRect.h = 50;
-    playerDestinationRect.w = 50;
-
-    SDL_Rect playerTextureRect;
-    playerTextureRect.x = 0;
-    playerTextureRect.y = 0;
-    playerTextureRect.h = 17;
-    playerTextureRect.w = 17;  
-    
     GravityFollowingEntity player(morpherTexture, playerDestinationRect, playerTextureRect, &globalValues, 0); 
-
-    SDL_Rect platformDestinationRect;
-    platformDestinationRect.x = WindowConstants::WIDTH/2 - 200;
-    platformDestinationRect.y = 500;
-    platformDestinationRect.h = 5;
-    platformDestinationRect.w = 200;
-
-    SDL_Rect platformDestinationRect2;
-    platformDestinationRect2.x = 1000;
-    platformDestinationRect2.y = 400;
-    platformDestinationRect2.h = 5;
-    platformDestinationRect2.w = 200;
-
-    SDL_Rect platformTextureRect;
-    platformTextureRect.x  = 0;
-    platformTextureRect.y = 0;
-    platformTextureRect.h = 3;
-    platformTextureRect.w = 49;
-    
-    Platform platform1(&platformDestinationRect, &platformTextureRect, &player, platformTexture, &globalValues);
+    Platform platform1(&platformDestinationRect1, &platformTextureRect, &player, platformTexture, &globalValues);
     Platform platform2(&platformDestinationRect2, &platformTextureRect, &player, platformTexture, &globalValues);
-        
-    Platform platforms[2] = {platform1, platform2};
+    Platform platform3(&platformDestinationRect3, &platformTextureRect, &player, platformTexture, &globalValues);
 
-    bool isRunning = true;
-    
+    std::vector<Platform> platforms = {platform1, platform2, platform3};
+
+    bool isRunning = true; 
     SDL_Event event;
     
     float lastRenderTime = SDL_GetTicks();
     
-    int cnt = 0;
-    
     bool gameOver = false;
     int gameOverTime = 0;
 
-    player.setY(platform1.getY() - player.getCurrentFrame()->h);
+    player.setY(platform1.getY() - player.getCurrentFrame()->h - 10);
     player.setOnFloor(true);
     
     while (isRunning) {
-
         const Uint8* keyboardStates = SDL_GetKeyboardState(NULL);  
         if (keyboardStates[SDL_SCANCODE_W])
             if (player.isOnFloor()) {
@@ -111,42 +89,40 @@ int main(int argc, char* args[]) {
                 case SDL_QUIT:
                       isRunning = false;
                       break;
-                default:
-                      break;
             }
-
 
          if (gameOver)
             player.moveTowardsCenter();
          else player.updateLocation();
-    
-        for (Platform &platform : platforms)
-            platform.updateLocation();
- 
-
+       
         for (Platform &platform : platforms) {
-            if (
-                (player.getX() + player.getCurrentFrame()->w >= platform.getX() && player.getX() <= platform.getX() + platform.getCurrentFrame()->w)
-                && (((player.getY() + player.getCurrentFrame()->h) < platform.getY() 
-                && (player.getPredictedPositionY() + player.getCurrentFrame()->h) >= platform.getY()) || (player.getY() + player.getCurrentFrame()->h) == platform.getY())) {
+            platform.updateLocation();
+            
 
-                    player.setY(platform.getY() - player.getCurrentFrame()->h);
-                    player.setOnFloor(true);
-                    goto skip;         
+            bool inBetweenX = 
+                player.getX() + player.getCurrentFrame()->w >= platform.getX()
+                && player.getX() <= platform.getX() + platform.getCurrentFrame()->w;
+
+            bool inBetweenY = 
+                (player.getY() + player.getCurrentFrame()->h < platform.getY()
+                && player.getPredictedPositionY() + player.getCurrentFrame()->h >= platform.getY())
+                || player.getY() + player.getCurrentFrame()->h == platform.getY();
+            
+            if (inBetweenX && inBetweenY) {
+                player.setY(platform.getY() - player.getCurrentFrame()->h);
+                player.setOnFloor(true);
+                goto skip;
             }
-
-            player.setOnFloor(false);
+            
+          player.setOnFloor(false);
         }
-
-        skip: 
-
- 
+        
+skip:
         // game over
-        if (player.getY() + player.getCurrentFrame()->h == WindowConstants::HEIGHT && !gameOver) {
+        if (player.getY() + player.getCurrentFrame()->h >= WindowConstants::HEIGHT && !gameOver) {
            gameOver = true;
            gameOverTime = SDL_GetTicks();
         }
-
 
         float curTime = SDL_GetTicks();
         float delayTime = std::max(0.0f, WindowConstants::FRAME_TIME_MILLISECONDS - (curTime - lastRenderTime)); 
@@ -157,6 +133,7 @@ int main(int argc, char* args[]) {
         lastRenderTime = curTime; 
         
         window.clear();
+
         for (auto &platform : platforms)
             window.render(platform); 
         
@@ -165,11 +142,9 @@ int main(int argc, char* args[]) {
             globalValues.setWindowY(gameOverTime - SDL_GetTicks());
             window.render(gameOverTextEntity);
         } else window.render(player);
-        window.display(); 
-          }
-    
-
-    
+            window.display(); 
+    }
+       
     window.cleanup();
     SDL_Quit();
 
